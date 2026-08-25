@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+// ------------------------
+// USERS & AUTH
+// ------------------------
+
+model User {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  name      String?
+  location  String?
+  role      Role     @default(CITIZEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions      Session[]
+  cases         Case[]
+  conversations AiConversation[]
+
+  @@map("users")
+}
+
+enum Role {
+  CITIZEN
+  ADMIN
+  SUPPORT
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ------------------------
+// CASES
+// ------------------------
+
+model Case {
+  id          String     @id @default(uuid())
+  code        String     @unique // e.g. MSD-000123
+  userId      String
+  category    Category
+  description String
+  urgency     Urgency    @default(MEDIUM)
+  status      CaseStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id])
+  events     CaseEvent[]
+  evidence   Evidence[]
+  referrals  Referral[]
+
+  @@map("cases")
+}
+
+enum Category {
+  EMPLOYMENT
+  HOUSING
+  LAND
+  POLICE
+  FAMILY
+  CONSUMER
+  DEBT
+  GBV
+  PUBLIC_SERVICE
+  OTHER
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum CaseStatus {
+  ACTIVE
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+model CaseEvent {
+  id          String   @id @default(uuid())
+  caseId      String
+  type        String
+  description String
+  createdAt   DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@map("case_events")
+}
+
+// ------------------------
+// LEGAL KNOWLEDGE BASE
+// ------------------------
+
+model LegalDocument {
+  id           String   @id @default(uuid())
+  title        String
+  source       String
+  sourceUrl    String?
+  documentType String
+  jurisdiction String   @default("Kenya")
+  version      String?
+  publishedAt  DateTime?
+  verifiedAt   DateTime?
+  content      String
+
+  chunks LegalChunk[]
+
+  @@map("legal_documents")
+}
+
+model LegalChunk {
+  id         String                  @id @default(uuid())
+  documentId String
+  content    String
+  embedding  Unsupported("vector(1536)")?
+  pageNumber Int?
+  section    String?
+  metadata   Json?
+
+  document LegalDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("legal_chunks")
+}
+
+// ------------------------
+// PROVIDERS & REFERRALS
+// ------------------------
+
+model Provider {
+  id           String   @id @default(uuid())
+  name         String
+  organization String?
+  location     String?
+  phone        String?
+  email        String?
+  website      String?
+  verified     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  services  ProviderService[]
+  referrals Referral[]
+
+  @@map("providers")
+}
+
+model ProviderService {
+  id         String   @id @default(uuid())
+  providerId String
+  category   Category
+  createdAt  DateTime @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_services")
+}
+
+model Referral {
+  id         String   @id @default(uuid())
+  caseId     String
+  providerId String
+  createdAt  DateTime @default(now())
+
+  case     Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id])
+
+  @@map("referrals")
+}
+
+// ------------------------
+// EVIDENCE
+// ------------------------
+
+model Evidence {
+  id          String   @id @default(uuid())
+  caseId      String
+  fileUrl     String
+  fileType    String
+  description String?
+  createdAt   DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@map("evidence")
+}
+
+// ------------------------
+// REPORTS (anonymous/community reports)
+// ------------------------
+
+model Report {
+  id          String       @id @default(uuid())
+  category    Category
+  description String
+  location    String?
+  anonymous   Boolean      @default(true)
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+
+  @@map("reports")
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+// ------------------------
+// AI CONVERSATIONS
+// ------------------------
+
+model AiConversation {
+  id        String   @id @default(uuid())
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user     User?       @relation(fields: [userId], references: [id])
+  messages AiMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           String // "user" | "assistant" | "system"
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("ai_messages")
+}
+
+// ------------------------
+// AUDIT LOGS
+// ------------------------
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}

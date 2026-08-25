@@ -3,19 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "prisma skills sync || exit 0"
-  },
+ "scripts": {
+  "generate": "prisma generate",
+  "migrate": "prisma migrate dev",
+  "studio": "prisma studio"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
-    "@prisma/client": "^7.10.0"
+    "@prisma/client": "^7.10.0",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "prisma": "8.0.0-rc.10",
+    "prisma": "7.10.0",
     "typescript": "^7.0.2"
   }
 }
