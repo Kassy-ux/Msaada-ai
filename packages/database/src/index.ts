@@ -2,11 +2,9 @@ import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
-// Walk upward from this file's directory until we find the repo root .env
 function findRootEnv(startDir: string): string | null {
   let dir = startDir;
   for (let i = 0; i < 6; i++) {
@@ -26,8 +24,6 @@ if (rootEnvPath) {
   dotenv.config();
 }
 
-neonConfig.webSocketConstructor = ws;
-
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -36,7 +32,8 @@ if (!connectionString) {
   );
 }
 
-const adapter = new PrismaNeon({ connectionString });
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

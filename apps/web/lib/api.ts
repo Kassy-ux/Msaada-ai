@@ -76,3 +76,26 @@ export async function createCase(
 
   return response.json();
 }
+
+export interface CaseEvent {
+  id: string;
+  type: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface CaseDetail extends CaseRecord {
+  events: CaseEvent[];
+}
+
+export async function getCases(): Promise<CaseRecord[]> {
+  const response = await fetch(`${API_URL}/api/cases`);
+  if (!response.ok) throw new Error("Failed to load cases.");
+  return response.json();
+}
+
+export async function getCase(id: string): Promise<CaseDetail> {
+  const response = await fetch(`${API_URL}/api/cases/${id}`);
+  if (!response.ok) throw new Error("Failed to load case.");
+  return response.json();
+}
