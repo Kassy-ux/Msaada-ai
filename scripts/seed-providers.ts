@@ -1,5 +1,34 @@
 import { prisma } from "../packages/database/src/index";
 
+function isTransientTimeout(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "ETIMEDOUT"
+  );
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function seedWithRetry(): Promise<void> {
+  const attempts = 3;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      await main();
+      return;
+    } catch (error) {
+      if (!isTransientTimeout(error) || attempt === attempts) throw error;
+
+      console.warn(`Database connection timed out; retrying (${attempt}/${attempts})...`);
+      await delay(attempt * 500);
+    }
+  }
+}
+
 async function main() {
   const providers = [
     {
@@ -32,38 +61,63 @@ async function main() {
       verified: true,
       categories: ["GBV", "FAMILY"],
     },
+    {
+      name: "Msaada Demo Legal Aid (TEST ONLY)",
+      organization: "Msaada demo data — not a real provider",
+      location: "Nairobi",
+      phone: "+254700000000",
+      email: "demo@example.test",
+      website: "https://example.test",
+      verified: true,
+      categories: ["POLICE", "EMPLOYMENT", "HOUSING", "LAND", "FAMILY", "GBV", "CONSUMER", "DEBT", "PUBLIC_SERVICE", "OTHER"],
+    },
   ];
 
   for (const p of providers) {
-    const provider = await prisma.provider.create({
-      data: {
-        name: p.name,
-        organization: p.organization,
-        location: p.location,
-        phone: p.phone,
-        email: p.email,
-        website: p.website,
-        verified: p.verified,
-      },
-    });
+    const existing = await prisma.provider.findFirst({ where: { name: p.name } });
+    const provider = existing
+      ? await prisma.provider.update({
+          where: { id: existing.id },
+          data: {
+            organization: p.organization,
+            location: p.location,
+            phone: p.phone,
+            email: p.email,
+            website: p.website,
+            verified: p.verified,
+          },
+        })
+      : await prisma.provider.create({
+          data: {
+            name: p.name,
+            organization: p.organization,
+            location: p.location,
+            phone: p.phone,
+            email: p.email,
+            website: p.website,
+            verified: p.verified,
+          },
+        });
 
-    for (const category of p.categories) {
-      await prisma.providerService.create({
-        data: {
+    await prisma.providerService.deleteMany({ where: { providerId: provider.id } });
+    await prisma.providerService.createMany({
+      data: p.categories.map((category) => ({
           providerId: provider.id,
           category: category as any,
-        },
-      });
-    }
+      })),
+    });
 
-    console.log(`Seeded provider: ${p.name}`);
+    console.log(`${existing ? "Updated" : "Seeded"} provider: ${p.name}`);
   }
 
   console.log("Provider seeding complete.");
-  process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("Seeding failed:", err);
-  process.exit(1);
-});
+seedWithRetry()
+  .catch((err) => {
+    console.error("Seeding failed:", err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

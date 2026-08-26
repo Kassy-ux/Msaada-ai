@@ -13,6 +13,7 @@ import { adminLegalDocumentRoutes } from "./modules/admin/admin-legal-documents.
 import { adminUserRoutes } from "./modules/admin/admin-users.routes";
 import { adminCaseRoutes } from "./modules/admin/admin-cases.routes";
 import { adminReportRoutes } from "./modules/admin/admin-reports.routes";
+import { warmEmbeddingModel } from "../../../packages/legal/embeddings/generateEmbeddingLocal";
 
 const server = Fastify({ logger: true });
 
@@ -37,7 +38,13 @@ server.register(adminReportRoutes);
 
 const start = async () => {
   try {
-    await server.listen({ port: 4000, host: "0.0.0.0" });
+    // Keep the first citizen request responsive by loading the embedding model
+    // before the API begins accepting traffic.
+    await warmEmbeddingModel();
+    await server.listen({
+      port: Number(process.env.PORT ?? 4000),
+      host: "0.0.0.0",
+    });
   } catch (err) {
     server.log.error(err);
     process.exit(1);

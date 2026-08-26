@@ -21,11 +21,12 @@ export interface TriageResponse {
 }
 
 export async function runTriage(userText: string): Promise<TriageResponse> {
-  // 1. Classify the issue
-  const classification = await classifyIssue(userText);
-
-  // 2. Retrieve relevant legal context
-  const retrievedChunks = await searchLegalChunks(userText, 5);
+  // Classification and retrieval are independent. Run them together so the
+  // request waits for the slower operation once, rather than serially.
+  const [classification, retrievedChunks] = await Promise.all([
+    classifyIssue(userText),
+    searchLegalChunks(userText, 5),
+  ]);
 
   // 3. Build context block for the model — ONLY verified sources go in
   const contextBlock =
