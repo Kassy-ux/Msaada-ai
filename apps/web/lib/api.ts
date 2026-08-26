@@ -99,3 +99,23 @@ export async function getCase(id: string): Promise<CaseDetail> {
   if (!response.ok) throw new Error("Failed to load case.");
   return response.json();
 }
+
+export interface Provider {
+  id: string;
+  name: string;
+  organization: string | null;
+  location: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  verified: boolean;
+}
+
+export async function getProviders(category?: string): Promise<Provider[]> {
+  const url = category
+    ? `${API_URL}/api/providers?category=${category}`
+    : `${API_URL}/api/providers`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Failed to load providers.");
+  return response.json();
+}

@@ -24,6 +24,7 @@ export default function GetHelpPage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setCaseCreated(null);
 
     try {
       const response = await submitTriage(input);
@@ -120,9 +121,7 @@ export default function GetHelpPage() {
 
             {result.sources_used.length > 0 && (
               <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
-                <h3 className="font-semibold text-gray-900 mb-2 text-sm">
-                  Sources
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-2 text-sm">Sources</h3>
                 <ul className="space-y-1">
                   {result.sources_used.map((src, i) => (
                     <li key={i} className="text-sm text-gray-500">
@@ -134,9 +133,16 @@ export default function GetHelpPage() {
             )}
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <button className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3 rounded-xl font-semibold transition-colors">
+              
+                href={
+                  result
+                    ? `/providers?category=${result.classification.category}`
+                    : "/providers"
+                }
+                className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3 rounded-xl font-semibold transition-colors text-center"
+              >
                 Find Legal Help
-              </button>
+              </a>
               <button
                 onClick={async () => {
                   if (!result) return;
@@ -148,7 +154,9 @@ export default function GetHelpPage() {
                     );
                     setCaseCreated(newCase.code);
                   } catch (err) {
-                    setError(err instanceof Error ? err.message : "Failed to create case.");
+                    setError(
+                      err instanceof Error ? err.message : "Failed to create case."
+                    );
                   }
                 }}
                 className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-semibold transition-colors"
