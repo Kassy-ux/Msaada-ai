@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
- "test:gemini": "tsx scripts/test-gemini.ts",
-     "test:triage": "tsx scripts/test-triage.ts",
+    "generate:prisma": "pnpm --dir packages/database exec prisma generate",
+    "test:gemini": "tsx scripts/test-gemini.ts",
+    "test:triage": "tsx scripts/test-triage.ts",
     "test:legal-search": "tsx scripts/test-legal-search.ts",
-"seed:providers": "tsx scripts/seed-providers.ts",
+    "seed:providers": "tsx scripts/seed-providers.ts",
     "ingest": "tsx scripts/ingest-legal-documents.ts"
   },
   "keywords": [],
