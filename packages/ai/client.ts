@@ -1,9 +1,37 @@
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import path from "path";
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+import fs from "fs";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Walk upward from this file's directory until we find the repo root .env
+function findRootEnv(startDir: string): string | null {
+  let dir = startDir;
+  for (let i = 0; i < 6; i++) {
+    const candidate = path.join(dir, ".env");
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
+const rootEnvPath = findRootEnv(__dirname);
+if (rootEnvPath) {
+  dotenv.config({ path: rootEnvPath });
+} else {
+  dotenv.config();
+}
+
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  throw new Error(
+    "GEMINI_API_KEY is not set. Check your root .env file."
+  );
+}
+
+const ai = new GoogleGenAI({ apiKey });
 
 const MODEL = "gemini-3.6-flash";
 

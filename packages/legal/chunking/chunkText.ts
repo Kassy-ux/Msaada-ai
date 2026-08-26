@@ -4,11 +4,6 @@ export interface TextChunk {
   index: number;
 }
 
-/**
- * Splits raw legal text into chunks along natural section boundaries
- * (lines starting with SECTION/ARTICLE/CHAPTER), falling back to
- * fixed-size chunking with overlap for unstructured text.
- */
 export function chunkText(
   rawText: string,
   options: { maxChunkSize?: number; overlap?: number } = {}
@@ -35,7 +30,6 @@ export function chunkText(
       if (trimmed.length <= maxChunkSize) {
         chunks.push({ content: trimmed, section, index: index++ });
       } else {
-        // section itself too long, sub-chunk it
         for (const sub of fixedSizeChunks(trimmed, maxChunkSize, overlap)) {
           chunks.push({ content: sub, section, index: index++ });
         }

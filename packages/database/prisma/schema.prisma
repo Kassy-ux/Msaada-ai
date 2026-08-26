@@ -132,7 +132,7 @@ model LegalChunk {
   id         String                  @id @default(uuid())
   documentId String
   content    String
-  embedding  Unsupported("vector(1536)")?
+  embedding  Unsupported("vector(384)")?
   pageNumber Int?
   section    String?
   metadata   Json?

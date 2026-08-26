@@ -2,9 +2,11 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -13,8 +15,11 @@
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/jwt": "^10.2.2",
+    "ai": "workspace:*",
+    "database": "workspace:*",
     "dotenv": "^17.4.2",
-    "fastify": "^5.12.1"
+    "fastify": "^5.12.1",
+    "legal": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.3.0",

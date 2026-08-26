@@ -1,6 +1,6 @@
 import { prisma } from "../../database/src/index";
 import { chunkText } from "../chunking/chunkText";
-import { generateEmbeddingsBatch } from "../embeddings/generateEmbedding";
+import { generateEmbeddingsBatch } from "../embeddings/generateEmbeddingLocal";
 import fs from "fs";
 
 export interface DocumentMeta {

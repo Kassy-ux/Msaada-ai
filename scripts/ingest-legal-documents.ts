@@ -14,6 +14,18 @@ async function main() {
     }
   );
 
+  await ingestDocument(
+    path.join(__dirname, "../packages/legal/sources/raw/landlord-tenant-sample.txt"),
+    {
+      title: "Landlord and Tenant Rights (Kenya) — Selected Provisions",
+      source: "Kenya Law / Business Premises Rent Tribunal guidance",
+      sourceUrl: "https://www.kenyalaw.org",
+      documentType: "STATUTE",
+      jurisdiction: "Kenya",
+      version: "2023",
+    }
+  );
+
   console.log("Ingestion complete.");
   process.exit(0);
 }

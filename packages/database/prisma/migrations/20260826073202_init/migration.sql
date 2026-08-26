@@ -84,7 +84,7 @@ CREATE TABLE "legal_chunks" (
     "id" TEXT NOT NULL,
     "documentId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "embedding" vector(1536),
+    "embedding" vector(384),
     "pageNumber" INTEGER,
     "section" TEXT,
     "metadata" JSONB,

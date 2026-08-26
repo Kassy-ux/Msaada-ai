@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
  "test:gemini": "tsx scripts/test-gemini.ts",
+     "test:triage": "tsx scripts/test-triage.ts",
     "test:legal-search": "tsx scripts/test-legal-search.ts",
     "ingest": "tsx scripts/ingest-legal-documents.ts"
   },
