@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { submitTriage, TriageResponse } from "@/lib/api";
+import { submitTriage, TriageResponse, createCase } from "@/lib/api";
 
 const URGENCY_STYLES: Record<string, string> = {
   LOW: "bg-blue-100 text-blue-800",
@@ -15,6 +15,7 @@ export default function GetHelpPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TriageResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [caseCreated, setCaseCreated] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -136,8 +137,23 @@ export default function GetHelpPage() {
               <button className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3 rounded-xl font-semibold transition-colors">
                 Find Legal Help
               </button>
-              <button className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-semibold transition-colors">
-                Create Case
+              <button
+                onClick={async () => {
+                  if (!result) return;
+                  try {
+                    const newCase = await createCase(
+                      result.classification.category,
+                      input,
+                      result.classification.urgency
+                    );
+                    setCaseCreated(newCase.code);
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : "Failed to create case.");
+                  }
+                }}
+                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-semibold transition-colors"
+              >
+                {caseCreated ? `Case ${caseCreated} created` : "Create Case"}
               </button>
             </div>
 

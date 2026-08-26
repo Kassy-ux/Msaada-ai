@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import "dotenv/config";
 import { triageRoutes } from "./modules/triage/triage.routes";
+import { caseRoutes } from "./modules/cases/cases.routes";
 
 const server = Fastify({ logger: true });
 
@@ -12,6 +13,7 @@ server.get("/health", async () => {
 });
 
 server.register(triageRoutes);
+server.register(caseRoutes);
 
 const start = async () => {
   try {

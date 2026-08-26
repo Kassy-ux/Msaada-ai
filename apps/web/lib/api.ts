@@ -47,3 +47,32 @@ export async function submitTriage(message: string): Promise<TriageResponse> {
 
   return response.json();
 }
+
+export interface CaseRecord {
+  id: string;
+  code: string;
+  category: string;
+  description: string;
+  urgency: string;
+  status: string;
+  createdAt: string;
+}
+
+export async function createCase(
+  category: string,
+  description: string,
+  urgency: string
+): Promise<CaseRecord> {
+  const response = await fetch(`${API_URL}/api/cases`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ category, description, urgency }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: "Unknown error" }));
+    throw new Error(err.error || "Failed to create case.");
+  }
+
+  return response.json();
+}
