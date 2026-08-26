@@ -134,6 +134,7 @@ export default function GetHelpPage() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               
+                <a
                 href={
                   result
                     ? `/providers?category=${result.classification.category}`

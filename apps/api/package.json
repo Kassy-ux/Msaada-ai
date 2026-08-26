@@ -14,8 +14,12 @@
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@fastify/cors": "^11.3.0",
+    "@fastify/formbody": "^9.0.0",
     "@fastify/jwt": "^10.2.2",
+    "@fastify/multipart": "^10.1.1",
+    "africastalking": "^0.8.3",
     "ai": "workspace:*",
+    "cloudinary": "^2.10.1",
     "database": "workspace:*",
     "dotenv": "^17.4.2",
     "fastify": "^5.12.1",

@@ -61,6 +61,7 @@ export default function ProvidersPage() {
               <div className="flex flex-wrap gap-3 text-sm">
                 {p.phone && (
                   
+                    <a
                     href={`tel:${p.phone}`}
                     className="text-emerald-700 font-medium hover:underline"
                   >
@@ -69,6 +70,7 @@ export default function ProvidersPage() {
                 )}
                 {p.website && (
                   
+                    <a
                     href={p.website}
                     target="_blank"
                     rel="noopener noreferrer"
